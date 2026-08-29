@@ -1,0 +1,5 @@
+# Configuration specifique a api-gateway, servie par le Config Server.
+
+document:
+  service:
+    url: ${DOCUMENT_SERVICE_URL:http://localhost:8081}

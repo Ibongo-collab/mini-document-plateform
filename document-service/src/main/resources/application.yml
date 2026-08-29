@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: document-service
+
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+
+  # TODO — business implementation : connexion PostgreSQL a ecrire soi-meme.
+  # Ces valeurs par defaut permettent seulement au contexte Spring de demarrer
+  # localement une fois une base disponible ; aucune base n'est fournie ici.
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/documents}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:1234}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+document:
+  storage:
+    aws-region: ${AWS_REGION:}
+    aws-s3-bucket: ${AWS_S3_BUCKET:}

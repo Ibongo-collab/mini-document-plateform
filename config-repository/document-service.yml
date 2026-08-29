@@ -1,0 +1,14 @@
+# Configuration specifique a document-service, servie par le Config Server.
+
+spring:
+  datasource:
+    # TODO — business implementation : connexion PostgreSQL a implementer soi-meme.
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/documents}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:1234}
+
+document:
+  storage:
+    # TODO — business implementation : configuration S3 a implementer soi-meme.
+    aws-region: ${AWS_REGION:eu-west-3}
+    aws-s3-bucket: ${AWS_S3_BUCKET:mini-document-platform-bucket}

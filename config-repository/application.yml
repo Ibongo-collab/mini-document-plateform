@@ -1,0 +1,7 @@
+# Configuration partagee par tous les services.
+# TODO — business implementation : ajouter ici les proprietes communes
+# (logging, observabilite, etc.) au fur et a mesure des besoins.
+
+logging:
+  level:
+    root: INFO

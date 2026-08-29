@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: document-service
+          # URL configurable via la variable d'environnement DOCUMENT_SERVICE_URL.
+          # En local, pointe par defaut sur l'instance document-service par defaut.
+          uri: ${DOCUMENT_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/documents/**
+          # TODO — apprendre les filtres Spring Cloud Gateway (StripPrefix, retry, etc.)
+          # si necessaire, une fois le routage de base valide.
+
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
