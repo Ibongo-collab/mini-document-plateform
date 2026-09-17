@@ -10,8 +10,8 @@ spring:
           uri: ${DOCUMENT_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/api/documents/**
-          # TODO — apprendre les filtres Spring Cloud Gateway (StripPrefix, retry, etc.)
-          # si necessaire, une fois le routage de base valide.
+          filters:
+            - StripPrefix=1
 
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}

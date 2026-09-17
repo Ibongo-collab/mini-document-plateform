@@ -6,9 +6,9 @@ package com.example.document.domain.exception;
  * Java pur — aucune dependance framework (pas de @ResponseStatus ici :
  * la traduction HTTP se fait dans l'adapter REST, pas dans le domaine).
  */
-public abstract class DocumentException extends RuntimeException {
+public class DocumentException extends RuntimeException {
 
-    protected DocumentException(String message) {
+    public DocumentException(String message) {
         super(message);
     }
 

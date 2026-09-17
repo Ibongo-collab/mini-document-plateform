@@ -8,13 +8,7 @@ package com.example.document.domain.model;
  * implementees dans l'Aggregate Root {@link Document}.
  */
 public enum DocumentStatus {
-
-    /** Le fichier est en cours d'upload vers le storage. */
     UPLOADING,
-
-    /** Le fichier est disponible et peut etre telecharge. */
     AVAILABLE,
-
-    /** Le document a ete supprime (suppression logique ou physique). */
     DELETED
 }

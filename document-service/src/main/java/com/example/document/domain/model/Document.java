@@ -1,83 +1,86 @@
 package com.example.document.domain.model;
 
+import com.example.document.domain.exception.InvalidDocumentStatusTransitionException;
+
 import java.time.Instant;
 import java.util.Objects;
 
 /**
  * Aggregate Root du contexte "Document".
- * <p>
- * Java pur — aucune dependance vers Spring, JPA, AWS ou tout autre
- * framework. C'est ici que doivent vivre les invariants et les regles
- * metier du domaine.
- * <p>
- * TODO — business implementation : cette classe ne contient volontairement
- * aucune logique metier. A implementer soi-meme, par exemple :
- * <ul>
- *     <li>les transitions de statut valides (UPLOADING -> AVAILABLE -> DELETED)</li>
- *     <li>les invariants de coherence (ex : un document DELETED ne peut pas
- *     redevenir AVAILABLE)</li>
- *     <li>les methodes de comportement (markAsAvailable(), delete(), ...)</li>
- * </ul>
  */
 public class Document {
 
     private final DocumentId id;
-    private DocumentName filename;
-    private DocumentSize size;
-    private String storageKey;
+    private final DocumentName filename;
+    private final DocumentSize size;
+    private final String storageKey;
     private DocumentStatus status;
     private final Instant createdAt;
 
     protected Document(DocumentId id,
-                        DocumentName filename,
-                        DocumentSize size,
-                        String storageKey,
-                        DocumentStatus status,
-                        Instant createdAt) {
+                       DocumentName filename,
+                       DocumentSize size,
+                       String storageKey,
+                       DocumentStatus status,
+                       Instant createdAt) {
         this.id = Objects.requireNonNull(id, "id must not be null");
         this.filename = Objects.requireNonNull(filename, "filename must not be null");
         this.size = Objects.requireNonNull(size, "size must not be null");
-        this.storageKey = storageKey;
+        this.storageKey = Objects.requireNonNull(storageKey, "storageKey must not be null");
         this.status = Objects.requireNonNull(status, "status must not be null");
         this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
     }
 
     /**
-     * Factory method de creation d'un nouveau Document.
-     * TODO — business implementation : appliquer les invariants de creation
-     * (statut initial, validation des champs, etc.)
+     * Cree un nouveau Document. Statut initial : UPLOADING, car au moment de
+     * la creation de l'agrégat, le fichier vient d'être envoyé au storage
+     * mais n'est pas encore confirmé disponible (voir markAsAvailable()).
      */
     public static Document create(DocumentName filename, DocumentSize size, String storageKey) {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        return new Document(
+                DocumentId.newId(),
+                filename,
+                size,
+                storageKey,
+                DocumentStatus.UPLOADING,
+                Instant.now()
+        );
     }
 
     /**
-     * Reconstruction d'un Document existant (ex : depuis la persistance).
-     * TODO — business implementation.
+     * Reconstruit un Document existant depuis la persistance.
+     * Pas de validation de transition ici : la donnee vient d'une source
+     * deja consideree fiable (la base de donnees).
      */
     public static Document reconstruct(DocumentId id,
-                                        DocumentName filename,
-                                        DocumentSize size,
-                                        String storageKey,
-                                        DocumentStatus status,
-                                        Instant createdAt) {
-        throw new UnsupportedOperationException("TODO — business implementation");
+                                       DocumentName filename,
+                                       DocumentSize size,
+                                       String storageKey,
+                                       DocumentStatus status,
+                                       Instant createdAt) {
+        return new Document(id, filename, size, storageKey, status, createdAt);
     }
 
     /**
-     * Marque le document comme disponible une fois l'upload termine.
-     * TODO — business implementation : verifier la transition de statut.
+     * Marque le document comme disponible une fois l'upload confirme.
+     * Seule transition valide : UPLOADING -> AVAILABLE.
      */
     public void markAsAvailable() {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        if (status != DocumentStatus.UPLOADING) {
+            throw new InvalidDocumentStatusTransitionException(status, DocumentStatus.AVAILABLE);
+        }
+        this.status = DocumentStatus.AVAILABLE;
     }
 
     /**
-     * Marque le document comme supprime.
-     * TODO — business implementation : verifier la transition de statut.
+     * Marque le document comme supprimé.
+     * Un document deja supprime ne peut pas etre supprime a nouveau.
      */
     public void delete() {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        if (status == DocumentStatus.DELETED) {
+            throw new InvalidDocumentStatusTransitionException(status, DocumentStatus.DELETED);
+        }
+        this.status = DocumentStatus.DELETED;
     }
 
     public DocumentId id() {

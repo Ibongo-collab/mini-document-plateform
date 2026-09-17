@@ -5,15 +5,11 @@ import java.util.UUID;
 
 /**
  * Value Object identifiant un Document de maniere unique.
- * <p>
- * Java pur — aucune dependance framework. L'egalite est basee sur la valeur,
- * pas sur la reference (comportement standard d'un Value Object).
+ * L'égalité est basee sur la valeur, pas sur la reference (comportement standard d'un Value Object).
  */
-public final class DocumentId {
+public record DocumentId(UUID value) {
 
-    private final UUID value;
-
-    private DocumentId(UUID value) {
+    public DocumentId(UUID value) {
         this.value = Objects.requireNonNull(value, "value must not be null");
     }
 
@@ -25,24 +21,11 @@ public final class DocumentId {
         return new DocumentId(value);
     }
 
-    public static DocumentId of(String value) {
-        return new DocumentId(UUID.fromString(value));
-    }
-
-    public UUID value() {
-        return value;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DocumentId that)) return false;
         return value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
     }
 
     @Override

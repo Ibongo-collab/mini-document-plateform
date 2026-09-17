@@ -5,9 +5,6 @@ spring:
   config:
     import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
 
-  # TODO — business implementation : connexion PostgreSQL a ecrire soi-meme.
-  # Ces valeurs par defaut permettent seulement au contexte Spring de demarrer
-  # localement une fois une base disponible ; aucune base n'est fournie ici.
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/documents}
     username: ${DATABASE_USERNAME:postgres}
@@ -15,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     open-in-view: false
 
 server:
@@ -32,5 +29,5 @@ management:
 
 document:
   storage:
-    aws-region: ${AWS_REGION:}
-    aws-s3-bucket: ${AWS_S3_BUCKET:}
+    aws-region: ${AWS_REGION:eu-north-1}
+    aws-s3-bucket: ${AWS_S3_BUCKET:mini-document-platform-benit-dev}

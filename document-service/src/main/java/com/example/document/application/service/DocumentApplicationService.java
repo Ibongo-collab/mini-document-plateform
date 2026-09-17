@@ -7,25 +7,21 @@ import com.example.document.application.port.in.ListDocumentsUseCase;
 import com.example.document.application.port.in.UploadDocumentUseCase;
 import com.example.document.application.port.out.DocumentRepositoryPort;
 import com.example.document.application.port.out.DocumentStoragePort;
+import com.example.document.domain.exception.DocumentNotFoundException;
 import com.example.document.domain.model.Document;
 import com.example.document.domain.model.DocumentId;
+import com.example.document.domain.model.DocumentName;
+import com.example.document.domain.model.DocumentSize;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.List;
 
-/**
- * Implementation applicative des use cases entrants.
- * <p>
- * Depend uniquement des ports (in et out), jamais directement d'une
- * technologie d'infrastructure. Injection par constructeur — pas de
- * {@code @Autowired} sur les champs.
- * <p>
- * TODO — business implementation : chaque methode ne fait aujourd'hui que
- * declarer l'intention ; la logique reelle (orchestration domaine + ports
- * sortants) est a ecrire par l'auteur du projet.
- */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class DocumentApplicationService implements
         UploadDocumentUseCase,
         GetDocumentUseCase,
@@ -36,34 +32,45 @@ public class DocumentApplicationService implements
     private final DocumentRepositoryPort documentRepositoryPort;
     private final DocumentStoragePort documentStoragePort;
 
-    public DocumentApplicationService(DocumentRepositoryPort documentRepositoryPort,
-                                       DocumentStoragePort documentStoragePort) {
-        this.documentRepositoryPort = documentRepositoryPort;
-        this.documentStoragePort = documentStoragePort;
-    }
 
     @Override
     public Document upload(UploadDocumentCommand command) {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        DocumentName filename = DocumentName.of(command.filename());
+        DocumentSize size = DocumentSize.ofBytes(command.sizeInBytes());
+
+        String storageKey = documentStoragePort.store(filename.value(), command.content(), size.bytes());
+
+        Document document = Document.create(filename, size, storageKey);
+        document.markAsAvailable();
+
+        return documentRepositoryPort.save(document);
     }
 
     @Override
     public Document getById(DocumentId id) {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        return documentRepositoryPort.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
     }
 
     @Override
     public List<Document> listAll() {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        return documentRepositoryPort.findAll();
     }
 
     @Override
     public InputStream download(DocumentId id) {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        Document document = documentRepositoryPort.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
+        return documentStoragePort.retrieve(document.storageKey());
     }
 
     @Override
     public void delete(DocumentId id) {
-        throw new UnsupportedOperationException("TODO — business implementation");
+        Document documentToDelete = documentRepositoryPort.findById(id).orElseThrow(() -> new DocumentNotFoundException(id));
+        documentToDelete.delete();
+        documentStoragePort.delete(documentToDelete.storageKey());
+        documentRepositoryPort.deleteById(documentToDelete);
+
+        log.info("Document deleted: {}", documentToDelete.filename());
     }
 }

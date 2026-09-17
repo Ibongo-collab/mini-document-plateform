@@ -6,8 +6,6 @@ import java.io.InputStream;
 
 /**
  * Port entrant : telechargement du contenu binaire d'un document.
- * TODO — business implementation : ajuster la signature (streaming,
- * metadonnees associees, etc.) selon les besoins reels.
  */
 public interface DownloadDocumentUseCase {
 

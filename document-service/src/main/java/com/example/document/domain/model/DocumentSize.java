@@ -1,5 +1,7 @@
 package com.example.document.domain.model;
 
+import com.example.document.domain.exception.DocumentValidationException;
+
 import java.util.Objects;
 
 /**
@@ -11,10 +13,15 @@ import java.util.Objects;
 public final class DocumentSize {
 
     private final long bytes;
+    private static final long MAX_ALLOWED_BYTES = 5 * 1024 * 1024;
 
     private DocumentSize(long bytes) {
-        // TODO — business implementation : valider que bytes >= 0,
-        // et eventuellement definir une taille maximale.
+        if (bytes < 0) {
+            throw new IllegalArgumentException("bytes must be > 0");
+        }
+        if (bytes > MAX_ALLOWED_BYTES) {
+            throw new DocumentValidationException("Document size exceeds the maximum allowed limit of " + MAX_ALLOWED_BYTES);
+        }
         this.bytes = bytes;
     }
 

@@ -14,7 +14,7 @@ import java.io.InputStream;
 public interface DocumentStoragePort {
 
     /**
-     * Stocke le contenu d'un fichier et retourne la cle de stockage (storageKey).
+     * Stocke le contenu d'un fichier et retourne la clé de stockage (storageKey).
      */
     String store(String filename, InputStream content, long sizeInBytes);
 

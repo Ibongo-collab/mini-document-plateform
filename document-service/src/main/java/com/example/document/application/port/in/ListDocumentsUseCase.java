@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * Port entrant : consultation de la liste des documents.
- * TODO — business implementation : ajouter pagination / filtres si necessaire.
  */
 public interface ListDocumentsUseCase {
 
