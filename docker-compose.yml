@@ -1,0 +1,83 @@
+# ============================================================
+# Orchestration locale de mini-document-platform
+# ============================================================
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: documents
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  config-server:
+    ports:
+      - "8888:8888"
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    environment:
+      CONFIG_REPO_URI: file:///config-repository
+      CONFIG_REPO_BRANCH: main
+      SERVER_PORT: 8888
+    volumes:
+      - ./config-repository:/config-repository:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  document-service:
+    build:
+      context: .
+      dockerfile: document-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8081
+      CONFIG_SERVER_URL: http://config-server:8888
+      # A l'interieur du reseau Docker, "postgres" est resolu par son
+      # nom de service — pas besoin de "localhost".
+      DATABASE_URL: jdbc:postgresql://postgres:5432/documents
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      AWS_REGION: ${AWS_REGION}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    depends_on:
+      document-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      CONFIG_SERVER_URL: http://config-server:8888
+      DOCUMENT_SERVICE_URL: http://document-service:8081
+    ports:
+      # Seul service expose sur la machine hote : http://localhost:8080
+      - "8080:8080"
+
+volumes:
+  postgres_data:

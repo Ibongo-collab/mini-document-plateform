@@ -1,0 +1,12 @@
+# Evite d'envoyer des fichiers inutiles/sensibles dans le contexte de build Docker.
+target/
+*.class
+.idea/
+*.iml
+.vscode/
+.git/
+.gitignore
+.env
+docker-compose.yml
+README.md
+*.md
