@@ -1,13 +1,9 @@
 spring:
   application:
     name: config-server
-  cloud:
-    config:
-      server:
-        git:
-          uri: ${CONFIG_REPO_URI:file://${user.dir}/../config-repository}
-          default-label: ${CONFIG_REPO_BRANCH:main}
-          clone-on-start: true
+
+  profiles:
+    active: ${CONFIG_SERVER_PROFILE:native}
 
 server:
   port: ${SERVER_PORT:8888}
@@ -17,3 +13,28 @@ management:
     web:
       exposure:
         include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: ${CONFIG_REPO_URI:file:///config-repository}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_REPO_URI:https://github.com/Ibongo-collab/mini-document-plateform.git}
+          search-paths: config-repository
+          default-label: ${CONFIG_REPO_BRANCH:main}
+          clone-on-start: true
