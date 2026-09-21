@@ -70,6 +70,24 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Testcontainers : demarre un vrai Postgres ephemere pour les
+             tests d'integration, en local comme sur le runner GitHub Actions. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -77,6 +95,21 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Docker Engine 29 refuse les versions d'API < 1.40, alors que
+                             le client docker-java embarque par Testcontainers negocie 1.32
+                             par defaut : sans ce pin, les tests d'integration echouent avec
+                             "Could not find a valid Docker environment".
+                             1.44 = Docker Engine 25.0 (janvier 2024) ; a relever si un jour
+                             le moteur minimal du projet devient plus recent. -->
+                        <api.version>1.44</api.version>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
