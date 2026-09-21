@@ -1,19 +1,22 @@
 package com.example.document;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- * Test minimal : verifie uniquement que le contexte Spring demarre.
- * Les tests metier (domaine, use cases, controller) seront ecrits par
- * l'auteur du projet.
- */
-@SpringBootTest
-class DocumentServiceApplicationTests {
+
+@SpringBootTest(properties = {
+        "spring.cloud.config.enabled=false",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "document.storage.aws-region=eu-north-1",
+        "document.storage.aws-s3-bucket=test-bucket"
+})
+@DisplayName("document-service : demarrage du contexte")
+class DocumentServiceApplicationTests extends AbstractPostgresContainerTest {
 
     @Test
+    @DisplayName("le contexte applicatif se charge")
     void contextLoads() {
-        // TODO — business implementation : ajouter des tests unitaires sur le
-        // domaine et des tests d'integration sur les adapters.
+        // Echoue si un bean est mal cable ou si le schema ne peut pas etre cree.
     }
 }
