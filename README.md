@@ -1,14 +1,9 @@
 # Mini Document Platform
 
-Projet de portfolio personnel pedagogique visant a monter en competence
-progressivement sur : **Java / Spring Boot, Spring Cloud, Domain-Driven
-Design, Architecture Hexagonale, Docker, GitHub Actions, CI/CD, Render, puis
-AWS et Kubernetes.**
-
-Ce depot ne contient volontairement que le **squelette** du projet. La
-logique metier, la persistance, le stockage S3, le conteneurisation et le
-deploiement sont laisses vides ou minimaux, avec des `TODO` explicites, pour
-etre implementes par l'auteur du projet.
+Projet de portfolio personnel visant à monter en competence
+sur : **Java / Spring Boot, Spring Cloud, Domain-Driven
+Design, Architecture Hexagonale, Docker, GitHub Actions, CI/CD, Render et
+AWS.**
 
 ---
 
@@ -26,17 +21,8 @@ permettant de :
 Un document possede : `id`, `filename`, `size`, `storageKey`, `status`,
 `createdAt`.
 
-Le fichier binaire sera stocke a terme dans **AWS S3**, et les metadonnees
+Le fichier binaire sera stocké à terme dans **AWS S3**, et les métadonnées
 dans **PostgreSQL**.
-
-Le projet est concu pour etre deploye en deux temps :
-
-1. **Niveau 1 — Render**, pour apprendre Docker, Docker Compose, GitHub
-   Actions, CI/CD, la gestion des secrets et le deploiement Docker sur
-   Render.
-2. **Niveau 2 — AWS**, en reprenant exactement le meme code, sans modifier
-   le domaine ni la logique metier, pour apprendre ECR, EC2, S3, RDS, IAM,
-   VPC, CloudWatch, puis EKS / Kubernetes.
 
 ---
 
@@ -69,20 +55,11 @@ Le projet est concu pour etre deploye en deux temps :
         lu par api-gateway et document-service au demarrage
 ```
 
-### Niveau 1 — chaine de deploiement Render
+### Chaine de déploiement Render
 
 ```text
 Code -> GitHub -> GitHub Actions -> Tests -> Build Maven -> Docker -> Render
      -> Application accessible sur Internet
-```
-
-### Niveau 2 — chaine de deploiement AWS
-
-```text
-GitHub -> GitHub Actions -> Docker -> AWS ECR -> AWS EC2
-                                            |
-                                            v
-                                        AWS EKS -> Kubernetes
 ```
 
 ---
@@ -94,24 +71,22 @@ plus :
 
 ### `api-gateway`
 
-- Point d'entree HTTP unique.
+- Point d'entrée HTTP unique.
 - Route `/api/documents/**` vers `document-service` (URL configurable via
   `DOCUMENT_SERVICE_URL`).
 - Aucune logique metier, aucune authentification.
-- Spring Cloud Gateway (donc WebFlux — c'est normal et attendu pour la
-  gateway elle-meme).
+- Spring Cloud Gateway.
 
 ### `document-service`
 
-- Coeur du projet : gestion des documents.
+- Cœur du projet : gestion des documents.
 - Architecture hexagonale stricte + DDD (voir section dediee ci-dessous).
-- Spring MVC (Spring Web) — **pas** WebFlux : la nature reactive de la
-  gateway ne se propage pas au service metier.
+- Spring MVC (Spring Web).
 
 ### `config-server`
 
 - Spring Cloud Config Server.
-- Sert la configuration centralisee (`application.yml`,
+- Sert la configuration centralisée (`application.yml`,
   `document-service.yml`, `api-gateway.yml`) depuis le repository Git
   `config-repository`.
 
