@@ -122,17 +122,16 @@ plus :
 `document-service` respecte la separation stricte suivante :
 
 ```text
-domain/            -> Java pur. Aucune dependance Spring / JPA / AWS / HTTP.
-                       Aggregate Root, Value Objects, exceptions metier.
+domain/            -> Java pur aggregate Root, Value Objects, exceptions metier.
 
 application/
-  port/in/         -> Contrats des use cases (ce que l'exterieur peut demander).
-  port/out/        -> Contrats vers l'infrastructure (ce dont l'application a besoin).
+  port/in/         -> Contrats des use cases.
+  port/out/        -> Contrats vers l'infrastructure.
   service/         -> Implementation des use cases, orchestre domaine + ports out.
 
 adapter/
   in/rest/         -> Controller REST + DTO. Traduit HTTP <-> use cases.
-  out/persistence/ -> Implementation de DocumentRepositoryPort (JPA / PostgreSQL).
+  out/persistence/ -> Implementation de DocumentRepositoryPort.
   out/storage/     -> Implementation de DocumentStoragePort (AWS S3).
 
 infrastructure/    -> Configuration technique transverse.
@@ -150,43 +149,19 @@ Adapters
 Infrastructure
 ```
 
-Le domaine ne connait rien du monde exterieur ; l'application depend
-d'abstractions (les ports) ; les adapters implementent ces ports.
-
 ---
 
-## Ce qui est volontairement NON implemente
+## Contraintes à anticiper pour la containerisation / Render
 
-Pour rester un exercice d'apprentissage, ce squelette ne contient
-**aucune** implementation des elements suivants — a ecrire soi-meme :
+Ce README documente les contraintes, sans fournir les fichiers eux-memes :
 
-- logique metier complete (regles, invariants, transitions de statut) ;
-- persistance PostgreSQL / JPA reelle ;
-- integration AWS SDK / S3 reelle ;
-- Dockerfile, docker-compose, `render.yaml` ;
-- GitHub Actions / CI-CD ;
-- infrastructure AWS (EC2, ECR, RDS, IAM, VPC, EKS, Terraform, Helm) ;
-- authentification et securite avancee.
-
-Chaque fichier concerne contient un commentaire `TODO — business
-implementation` a l'endroit exact ou completer le code.
-
----
-
-## Contraintes a anticiper pour la containerisation / Render
-
-Ce README documente les contraintes, sans fournir les fichiers eux-memes
-(Dockerfile, docker-compose, GitHub Actions et `render.yaml` sont a ecrire
-par l'auteur du projet) :
-
-- Chaque module (`api-gateway`, `document-service`, `config-server`) devra
-  disposer de son propre Dockerfile (build multi-stage Maven recommande).
+- Chaque module (`api-gateway`, `document-service`, `config-server`)
+  dispose de son propre Dockerfile.
 - Toute la configuration doit venir de variables d'environnement — aucune
-  valeur sensible en dur (voir section Configuration).
+  valeur sensible en dur.
 - `document-service` et `api-gateway` exposent deja un endpoint de health
-  check via **Spring Boot Actuator** : `/actuator/health`. Render (et plus
-  tard Kubernetes) pourra s'appuyer dessus pour les probes de sante.
-- Le port d'ecoute de chaque service est configurable via `SERVER_PORT`, ce
+  check via **Spring Boot Actuator** : `/actuator/health`.
+- Le port d'écoute de chaque service est configurable via `SERVER_PORT`, ce
   qui correspond au fonctionnement de Render (port dynamique).
 - `config-server` doit etre accessible par les deux autres services avant
   leur propre demarrage complet (ou en mode degrade via
@@ -214,15 +189,13 @@ CONFIG_REPO_URI
 CONFIG_REPO_BRANCH
 ```
 
-Aucune cle AWS reelle ne doit jamais etre committee. Ne jamais mettre
+Aucune clé AWS réelle ne doit jamais être committée. Ne jamais mettre
 `AWS_ACCESS_KEY_ID` ou `AWS_SECRET_ACCESS_KEY` en dur dans le depot ou dans
 `config-repository`.
 
 ---
 
-## Roadmap d'apprentissage
-
-### Niveau 1 — Fondations & Render
+### Fondations & Render
 
 1. Implementer le domaine (Aggregate Root, Value Objects, invariants).
 2. Implementer PostgreSQL (JPA entities, repository, mapper).
@@ -236,37 +209,9 @@ Aucune cle AWS reelle ne doit jamais etre committee. Ne jamais mettre
 10. Mettre en place le deploiement continu (CD).
 11. Deployer sur Render.
 
-### Niveau 2 — AWS
-
-12. Configurer AWS IAM (roles, policies minimales).
-13. Brancher AWS S3 en remplacement/complement du stockage local.
-14. Provisionner AWS RDS (PostgreSQL manage).
-15. Pousser les images Docker vers AWS ECR.
-16. Deployer sur AWS EC2.
-17. Automatiser le deploiement vers EC2.
-
-### Niveau 3 — Kubernetes
-
-18. Installer Kubernetes en local (kind / minikube).
-19. Ecrire les manifests Kubernetes (Deployment, Service).
-20. Gerer les Secrets Kubernetes.
-21. Gerer les ConfigMaps.
-22. Mettre en place un Ingress.
-23. Pratiquer les rolling updates.
-24. Provisionner AWS EKS.
-25. Brancher le CI/CD vers EKS.
-
-### Niveau 4 — Bonus
-
-26. Terraform (infrastructure as code).
-27. Helm (packaging Kubernetes).
-28. Prometheus (metriques).
-29. Grafana (dashboards).
-30. AWS CloudWatch (logs & alarmes).
-
 ---
 
-## Structure du depot
+## Structure du dépot
 
 ```text
 mini-document-platform/
@@ -274,7 +219,5 @@ mini-document-platform/
 ├── document-service/       # Coeur metier — hexagonal + DDD
 ├── config-server/          # Spring Cloud Config Server
 ├── config-repository/      # Fichiers de configuration servis par config-server
-├── docker/                 # (vide) — Dockerfiles / docker-compose a ecrire
-├── k8s/                    # (vide) — manifests Kubernetes a ecrire
-└── .github/workflows/      # (vide) — workflows CI/CD a ecrire
+└── .github/workflows/      # workflows CI/CD 
 ```
